@@ -1,0 +1,6 @@
+*.exe
+*.dll
+bin
+obj
+x64
+Win32
