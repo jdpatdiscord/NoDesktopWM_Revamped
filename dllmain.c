@@ -71,6 +71,8 @@ HWND guilty = NULL;
 T_ShowWindowAsync Tramp_ShowWindowAsync = NULL;
 BOOL Hook_ShowWindowAsync(HWND hWnd, int nCmdShow)
 {
+    // These comments will serve a bit as documentation.
+
     // The previous version of this program was hooking WndProc to have an
     // event-based method of actually hiding the guilty window. This worked...
     // it was just buggy. As in, it showed up again for a split second.
@@ -97,6 +99,15 @@ BOOL Hook_ShowWindowAsync(HWND hWnd, int nCmdShow)
     // leads to where the watermark is  created, loaded, and maintained wholesale.
     // If symbols aren't available for you, just look for the CreateWindowInBand
     // xref.
+
+    // The concept of "window bands" might be a bit new for you. It's quite easy.
+    // As it have may been made obvious to you earlier, the ZBID enum is a list of
+    // Z-index types for what windows supercede others in a list. The index being
+    // used by Microsoft to keep the overlay on the screen at all times is quite
+    // high on that list. You are not able to use GetWindowBand/SetWindowBand in
+    // your own programs. Microsoft directly checks the caller's process to see if
+    // it is signed Microsoft code, which is quite unfortunate... and called
+    // downright anticompetitive depending on who you ask. 
     
     DWORD band;
     f_GetWindowBand(hWnd, &band);
