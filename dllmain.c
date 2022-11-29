@@ -1,5 +1,5 @@
-#include <Windows.h>
-#include <Handleapi.h>
+#include <windows.h>
+#include <handleapi.h>
 
 #include <stdio.h>
 #include <stdint.h>
@@ -108,9 +108,7 @@ BOOL Hook_ShowWindowAsync(HWND hWnd, int nCmdShow)
     // your own programs. Microsoft directly checks the caller's process to see if
     // it is signed Microsoft code, which is quite unfortunate... and called
     // downright anticompetitive depending on who you ask. 
-    
-    DWORD band;
-    f_GetWindowBand(hWnd, &band);
+
     if (hWnd == guilty)
     {
         nCmdShow = SW_HIDE;
