@@ -34,9 +34,10 @@ enum ZBID
 };
 
 typedef BOOL    (WINAPI* T_GetWindowBand)      (HWND hWnd, PDWORD pdwBand);
-typedef BOOL    (WINAPI* T_ShowWindowAsync)         (HWND hWnd, int nCmdShow);
-
 T_GetWindowBand f_GetWindowBand = NULL;
+
+typedef BOOL    (WINAPI* T_ShowWindow) (HWND hWnd, int nCmdShow);
+typedef BOOL    (WINAPI* T_ShowWindowAsync)    (HWND hWnd, int nCmdShow);
 
 void InitConsole()
 {
@@ -68,6 +69,7 @@ void InitConsole()
 }
 
 HWND guilty = NULL;
+
 T_ShowWindowAsync Tramp_ShowWindowAsync = NULL;
 BOOL Hook_ShowWindowAsync(HWND hWnd, int nCmdShow)
 {
@@ -117,6 +119,17 @@ BOOL Hook_ShowWindowAsync(HWND hWnd, int nCmdShow)
     return ret;
 }
 
+T_ShowWindow Tramp_ShowWindow = NULL;
+BOOL Hook_ShowWindow(HWND hWnd, int nCmdShow)
+{
+    if (hWnd == guilty)
+    {
+        nCmdShow = SW_HIDE;
+    }
+    BOOL ret = Tramp_ShowWindow(hWnd, nCmdShow);
+    return ret;
+}
+
 BOOL CALLBACK PerWindowOp(HWND hWnd, LPARAM param)
 {
     DWORD dwWindowBand = 0;
@@ -149,6 +162,7 @@ BOOL WINAPI DllMain(HINSTANCE hCurrentModule, DWORD dwCallReason, LPVOID)
         f_GetWindowBand = (T_GetWindowBand)GetProcAddress(g_hUser32Module, "GetWindowBand");
         
         MH_CreateHookApi(L"user32.dll", "ShowWindowAsync", Hook_ShowWindowAsync, (LPVOID*)&Tramp_ShowWindowAsync);
+        MH_CreateHookApi(L"user32.dll", "ShowWindow", Hook_ShowWindow, (LPVOID*)&Tramp_ShowWindow);
         MH_EnableHook(MH_ALL_HOOKS);
 
         EnumChildWindows(GetDesktopWindow(), &PerWindowOp, 0);

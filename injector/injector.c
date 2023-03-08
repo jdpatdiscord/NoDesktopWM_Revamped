@@ -8,20 +8,6 @@
 
 #include "injector.h"
 
-typedef struct _PROCESS_BASIC_INFORMATION {
-    NTSTATUS ExitStatus;
-    PVOID PebBaseAddress;
-    ULONG_PTR AffinityMask;
-    KPRIORITY BasePriority;
-    ULONG_PTR UniqueProcessId;
-    ULONG_PTR InheritedFromUniqueProcessId;
-} PROCESS_BASIC_INFORMATION;
-
-//typedef NTSTATUS (WINAPI* T_NtQuerySystemInformation)(SYSTEM_INFORMATION_CLASS SystemInformationClass, PVOID pSystemInformation, ULONG SystemInformationLength, PULONG pLength);
-//typedef NTSTATUS (WINAPI* T_NtQueryInformationProcess)(HANDLE hProcess, int ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
-//T_NtQuerySystemInformation F_NtQuerySystemInformation = NULL;
-//T_NtQueryInformationProcess F_NtQueryInformationProcess = NULL;
-
 PWCHAR RefExtractNameOnlyFromPathW(PWCHAR wstr, DWORD eos)
 {
     PWCHAR name_filenameonly = NULL;
@@ -40,15 +26,15 @@ int main(int argc, char* argv[])
 {
     if (argc <= 1) return 0;
 
+    //F_NtQuerySystemInformation = (T_NtQuerySystemInformation)GetProcAddress(GetModuleHandleA("ntdll.dll"), "NtQuerySystemInformation");
+    //F_NtQueryInformationProcess = (T_NtQueryInformationProcess)GetProcAddress(GetModuleHandleA("ntdll.dll"), "NtQueryInformationProcess");
+
     TCHAR name_dll[MAX_PATH + 1];
     DWORD ret = GetFullPathNameA(argv[1], sizeof(name_dll), (LPSTR)&name_dll, NULL);
     if (!ret)
     {
         return 0;
     }
-
-    //F_NtQuerySystemInformation = (T_NtQuerySystemInformation)GetProcAddress(GetModuleHandleA("ntdll.dll"), "NtQuerySystemInformation");
-    //F_NtQueryInformationProcess = (T_NtQueryInformationProcess)GetProcAddress(GetModuleHandleA("ntdll.dll"), "NtQueryInformationProcess");
 
     size_t multiple = 128;
     DWORD* pid_buf = malloc(sizeof(DWORD) * multiple);
@@ -150,8 +136,6 @@ int main(int argc, char* argv[])
     printf("Target pid %i\n", desiredExplorerPid);
 
     free(pid_buf);
-
-    //winlogon.exe
 
     HANDLE hExplorerTask = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_VM_WRITE | PROCESS_VM_READ | PROCESS_VM_OPERATION, FALSE, desiredExplorerPid);
     if (!hExplorerTask)
